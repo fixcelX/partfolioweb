@@ -1,0 +1,43 @@
+# ════════════════════════════════════════════════════════════════════════
+#  ZAMON MARKET — Render Blueprint
+#  Backend (Django) + PostgreSQL bazani avtomatik yaratadi.
+#  render.com → "New" → "Blueprint" → bu repozitoriyni tanlang.
+# ════════════════════════════════════════════════════════════════════════
+databases:
+  - name: zamon-db
+    databaseName: zamon
+    user: zamon
+    plan: free
+
+services:
+  - type: web
+    name: zamon-backend
+    runtime: python
+    plan: free
+    rootDir: backend
+    buildCommand: "pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate"
+    startCommand: "gunicorn config.wsgi:application"
+    envVars:
+      # Django asoslari
+      - key: SECRET_KEY
+        generateValue: true          # Render kuchli kalit yaratadi
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: ".onrender.com"
+      # Baza — yuqoridagi zamon-db'dan avtomatik ulanadi
+      - key: DATABASE_URL
+        fromDatabase:
+          name: zamon-db
+          property: connectionString
+      # Demo ma'lumot (105 mahsulot) birinchi ishga tushganda to'ldiriladi
+      - key: SEED_ON_START
+        value: "1"
+      # Redis'siz ishlash (email/order task'lar darhol bajariladi)
+      - key: CELERY_TASK_ALWAYS_EAGER
+        value: "True"
+      # ⚠️ Frontend deploy bo'lgach, bu 2 tasini Vercel domeniga almashtiring:
+      - key: CORS_ALLOWED_ORIGINS
+        value: "https://zamon.vercel.app"
+      - key: FRONTEND_URL
+        value: "https://zamon.vercel.app"

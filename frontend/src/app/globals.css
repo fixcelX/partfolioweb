@@ -1,0 +1,51 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 0 0% 100%;
+  --foreground: 240 10% 4%;
+}
+
+.dark {
+  --background: 240 10% 6%;
+  --foreground: 0 0% 98%;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+@layer components {
+  .container-zm {
+    @apply mx-auto w-full max-w-[1280px] px-4 sm:px-6 lg:px-8;
+  }
+  .skeleton {
+    @apply relative overflow-hidden rounded-lg bg-gray-200 dark:bg-gray-800;
+  }
+  .skeleton::after {
+    @apply absolute inset-0 -translate-x-full animate-shimmer
+      bg-gradient-to-r from-transparent via-white/60 to-transparent
+      dark:via-white/10;
+    content: "";
+  }
+}
+
+/* Maxsus scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: #d4d4d8;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #a1a1aa;
+}
