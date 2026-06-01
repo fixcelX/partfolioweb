@@ -10,13 +10,11 @@ import { SearchBar } from "./search-bar";
 import { ThemeToggle } from "./theme-toggle";
 import { useCart } from "@/lib/hooks";
 import { useAuth } from "@/stores/auth";
-import { useUI } from "@/stores/ui";
 
 export function Header() {
   const t = useTranslations("nav");
   const { data: cart } = useCart();
   const user = useAuth((s) => s.user);
-  const openCart = useUI((s) => s.openCart);
   const [menuOpen, setMenuOpen] = useState(false);
 
   const count = cart?.total_quantity ?? 0;
@@ -47,8 +45,9 @@ export function Header() {
           <ThemeToggle />
           <LangSwitcher />
           <Link
+            prefetch
             href="/account"
-            className="flex flex-col items-center rounded-lg px-2 py-1.5 text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800"
+            className="flex flex-col items-center rounded-lg px-2 py-1.5 text-gray-700 transition-transform hover:-translate-y-0.5 hover:bg-gray-100 active:scale-95 dark:text-gray-200 dark:hover:bg-gray-800"
           >
             <UserIcon className="h-5 w-5" />
             <span className="hidden text-[11px] lg:block">
@@ -56,16 +55,18 @@ export function Header() {
             </span>
           </Link>
           <Link
+            prefetch
             href="/wishlist"
-            className="hidden flex-col items-center rounded-lg px-2 py-1.5 text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800 sm:flex"
+            className="hidden flex-col items-center rounded-lg px-2 py-1.5 text-gray-700 transition-transform hover:-translate-y-0.5 hover:bg-gray-100 active:scale-95 sm:flex dark:text-gray-200 dark:hover:bg-gray-800"
           >
             <Heart className="h-5 w-5" />
             <span className="hidden text-[11px] lg:block">{t("wishlist")}</span>
           </Link>
-          <button
-            onClick={openCart}
+          <Link
+            prefetch
+            href="/cart"
             aria-label={t("cart")}
-            className="relative flex flex-col items-center rounded-lg px-2 py-1.5 text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800"
+            className="relative flex flex-col items-center rounded-lg px-2 py-1.5 text-gray-700 transition-transform hover:-translate-y-0.5 hover:bg-gray-100 active:scale-95 dark:text-gray-200 dark:hover:bg-gray-800"
           >
             <ShoppingCart className="h-5 w-5" />
             <span className="hidden text-[11px] lg:block">{t("cart")}</span>
@@ -74,7 +75,7 @@ export function Header() {
                 {count}
               </span>
             )}
-          </button>
+          </Link>
         </nav>
       </div>
 

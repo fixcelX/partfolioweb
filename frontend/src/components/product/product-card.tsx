@@ -32,8 +32,12 @@ export function ProductCard({ product }: { product: Product }) {
 
   return (
     <motion.div
-      whileHover={{ y: -4 }}
-      className="group relative flex h-full flex-col rounded-2xl border border-gray-100 bg-white p-3 shadow-card transition-shadow hover:shadow-hover dark:border-gray-800 dark:bg-gray-900"
+      initial={{ opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-40px" }}
+      transition={{ duration: 0.35, ease: "easeOut" }}
+      whileHover={{ y: -6 }}
+      className="group relative flex h-full flex-col rounded-2xl border border-primary-100/70 bg-white p-3 shadow-card transition-shadow hover:shadow-hover dark:border-gray-800 dark:bg-gray-900"
     >
       <WishlistButton productId={product.id} product={product} />
       <Link href={`/product/${product.slug}`} className="flex flex-1 flex-col">

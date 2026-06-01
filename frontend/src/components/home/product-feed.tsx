@@ -17,7 +17,10 @@ export function ProductFeed({
   return (
     <section className="container-zm mt-10">
       <div className="mb-4 flex items-center gap-3">
-        {accent && <span className="h-6 w-1.5 rounded-full" style={{ background: accent }} />}
+        <span
+          className="h-6 w-1.5 rounded-full bg-primary"
+          style={accent ? { background: accent } : undefined}
+        />
         <h2 className="text-xl font-extrabold sm:text-2xl">{title}</h2>
       </div>
       <ProductGrid products={data?.slice(0, 10)} loading={isLoading} skeletonCount={5} />

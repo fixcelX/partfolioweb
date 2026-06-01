@@ -23,6 +23,7 @@ node_modules/
 out/
 next-env.d.ts
 npm-debug.log*
+*.tsbuildinfo
 
 # IDE / OS
 .vscode/

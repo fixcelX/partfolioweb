@@ -16,7 +16,7 @@ export default async function HomePage({
     <div className="pb-8">
       <Hero />
       <CategoryStrip />
-      <ProductFeed kind="featured" title={t("featured")} accent="#7000ff" />
+      <ProductFeed kind="featured" title={t("featured")} accent="#ff7a00" />
       <ProductFeed kind="bestsellers" title={t("bestsellers")} accent="#f59e0b" />
       <ProductFeed kind="new" title={t("new")} accent="#16a34a" />
     </div>

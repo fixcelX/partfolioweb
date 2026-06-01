@@ -246,11 +246,20 @@ Manrope shrift va 8px grid asosida.
 cd C:\Users\Lenovo\OneDrive\Desktop\cloneweb\backend
 ..\.venv\Scripts\python.exe manage.py runserver 8000
 
-
 *** 2-amal 2-terminalda 
 
 cd C:\Users\Lenovo\OneDrive\Desktop\cloneweb\frontend
 npm run dev
 
 
+
+
+
+
+
+
+# Frontend terminalida Ctrl+C bosing, keyin:
+cd C:\Users\Lenovo\OneDrive\Desktop\cloneweb\frontend
+Remove-Item -Recurse -Force .next
+npm run dev
 ***
