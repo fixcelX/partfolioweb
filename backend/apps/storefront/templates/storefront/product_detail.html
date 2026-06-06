@@ -1,0 +1,143 @@
+{% extends "storefront/base.html" %}
+{% load static store i18n %}
+
+{% block title %}{{ product|loc }} — {{ t.brand }}{% endblock %}
+{% block meta_description %}{{ product|loc:"description"|truncatewords:24 }}{% endblock %}
+
+{% block content %}
+<div class="container section">
+  <nav class="crumbs">
+    <a href="{% url 'storefront:home' %}">{{ t.common.home }}</a>{% icon "chevron-right" %}
+    <a href="{% url 'storefront:category' product.category.slug %}">{{ product.category|loc }}</a>{% icon "chevron-right" %}
+    <span>{{ product|loc }}</span>
+  </nav>
+
+  {% include "storefront/partials/_messages.html" %}
+
+  <div class="pd">
+    {# Gallery #}
+    <div class="gallery">
+      {% if images %}
+      <div class="gallery__thumbs">
+        {% for img in images %}
+          <button class="gallery__thumb js-thumb {% if forloop.first %}is-active{% endif %}" data-src="{{ img.src }}" type="button">
+            <img src="{{ img.src }}" alt="{{ product|loc }}" loading="lazy">
+          </button>
+        {% endfor %}
+      </div>
+      {% endif %}
+      <div class="gallery__main">
+        {% if images %}
+          <img class="js-gallery-main" src="{{ images.0.src }}" alt="{{ product|loc }}">
+        {% else %}
+          <div class="card__media-empty">{% icon "package" size=60 %}</div>
+        {% endif %}
+        {% if product.discount_percent > 0 %}
+          <span class="card__discount" style="font-size:.9rem;padding:6px 12px;top:14px;left:14px">-{{ product.discount_percent }}% {{ t.product.off }}</span>
+        {% endif %}
+      </div>
+    </div>
+
+    {# Info #}
+    <div>
+      <h1 class="pd__title">{{ product|loc }}</h1>
+      <div class="pd__meta">
+        <span style="display:inline-flex;align-items:center;gap:6px">{% stars product.rating %} {{ product.rating|floatformat:1 }}</span>
+        <span>· {{ product.reviews_count }} {{ t.product.reviews }}</span>
+        <span>· {{ t.product.sold|fmt:product.sold_count }}</span>
+        {% if product.brand %}<span>· {{ t.product.brand }}: <b>{{ product.brand|loc }}</b></span>{% endif %}
+      </div>
+
+      <div class="pd__buybox">
+        <div>
+          <span class="pd__price">{{ product.final_price|som }} {{ t.common.som }}</span>
+          {% if product.discount_price %}<span class="pd__price-old">{{ product.price|som }}</span>{% endif %}
+        </div>
+
+        <div class="pd__avail {% if not product.in_stock %}pd__avail--out{% elif product.stock <= 3 %}pd__avail--low{% else %}pd__avail--in{% endif %}">
+          {% if not product.in_stock %}{{ t.product.outOfStock }}
+          {% elif product.stock <= 3 %}{{ t.product.onlyLeft|fmt:product.stock }}
+          {% else %}{{ t.product.inStock }}{% endif %}
+        </div>
+
+        <div class="pd__actions">
+          <div class="stepper js-stepper">
+            <button class="js-step-dec" type="button" aria-label="-">{% icon "minus" %}</button>
+            <input id="qtyInput" class="js-qty-input" type="number" value="1" min="1" max="{{ product.stock }}" aria-label="{{ t.cart.quantity }}">
+            <button class="js-step-inc" type="button" aria-label="+">{% icon "plus" %}</button>
+          </div>
+          <button class="btn btn--lg js-add-cart" data-product="{{ product.id }}" data-qty-target="qtyInput"
+                  type="button" style="flex:1" {% if not product.in_stock %}disabled{% endif %}>
+            {% icon "cart" %} {{ t.product.addToCart }}
+          </button>
+          <button class="wish-btn js-wish {% if product.id in wishlist_ids %}is-active{% endif %}"
+                  data-product="{{ product.id }}" type="button" aria-label="{{ t.product.addToWishlist }}">{% icon "heart" %}</button>
+        </div>
+
+        <div class="pd__ship">{% icon "truck" %} {{ t.product.delivery }} · {{ t.product.sku }}: {{ product.sku }}</div>
+      </div>
+    </div>
+  </div>
+
+  {# Tabs #}
+  <div class="tabs">
+    <div class="tabs__nav">
+      <button class="tab-btn js-tab is-active" data-tab="desc">{{ t.product.description }}</button>
+      <button class="tab-btn js-tab" data-tab="reviews">{{ t.product.reviews }} ({{ product.reviews_count }})</button>
+    </div>
+
+    <div class="tab-panel js-tab-panel is-active" data-panel="desc">
+      {% with desc=product|loc:"description" %}
+        <p class="prose">{% if desc %}{{ desc|linebreaksbr }}{% else %}{{ product|loc }}{% endif %}</p>
+      {% endwith %}
+    </div>
+
+    <div class="tab-panel js-tab-panel" data-panel="reviews">
+      {% if can_review %}
+        <form class="review-form" method="post" action="{% url 'storefront:review_create' product.slug %}">
+          {% csrf_token %}
+          <h4 style="margin-bottom:10px">{{ t.product.writeReview }}</h4>
+          <div class="field">
+            <span class="field__label">{{ t.product.yourRating }}</span>
+            <div class="rate-input">
+              {% for n in "54321" %}
+                <input type="radio" id="star{{ n }}" name="rating" value="{{ n }}" {% if n == "5" %}checked{% endif %}>
+                <label for="star{{ n }}">★</label>
+              {% endfor %}
+            </div>
+          </div>
+          <textarea class="textarea" name="text" placeholder="{{ t.product.reviewText }}" required minlength="3"></textarea>
+          <button class="btn" type="submit" style="margin-top:12px">{{ t.product.submitReview }}</button>
+        </form>
+      {% elif not user.is_authenticated %}
+        <a href="{% url 'storefront:login' %}?next={{ request.path }}" class="btn btn--soft" style="margin-bottom:20px">{{ t.product.loginToReview }}</a>
+      {% endif %}
+
+      {% if reviews %}
+        {% for r in reviews %}
+          <div class="review">
+            <div class="review__head">
+              <span class="review__name">{{ r.user.first_name|default:r.user.email|truncatechars:14 }}</span>
+              {% stars r.rating %}
+            </div>
+            {% if r.is_verified %}<span class="review__verified">{% icon "badge-check" %} {{ t.product.verifiedPurchase }}</span>{% endif %}
+            <p class="review__text">{{ r.text }}</p>
+          </div>
+        {% endfor %}
+      {% else %}
+        <p class="muted">{{ t.product.noReviews }}</p>
+      {% endif %}
+    </div>
+  </div>
+
+  {# Similar #}
+  {% if similar %}
+  <div class="section">
+    <div class="section-head"><h2 class="section-head__title">{% icon "sparkles" %} {{ t.product.similar }}</h2></div>
+    <div class="product-grid product-grid--detail">
+      {% for product in similar %}{% include "storefront/partials/_product_card.html" %}{% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

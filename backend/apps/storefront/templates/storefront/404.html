@@ -1,0 +1,12 @@
+{% extends "storefront/base.html" %}
+{% load static store i18n %}
+{% block title %}404 — {{ t.brand }}{% endblock %}
+{% block content %}
+<div class="container section">
+  <div style="max-width:480px;margin:50px auto;text-align:center">
+    <div style="font-size:6rem;font-weight:900;background:linear-gradient(135deg,var(--primary),var(--warning));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;line-height:1">404</div>
+    <h1 style="margin-top:10px">{{ t.common.notFound }}</h1>
+    <a href="{% url 'storefront:home' %}" class="btn" style="margin-top:20px">{% icon "home" %} {{ t.common.backHome }}</a>
+  </div>
+</div>
+{% endblock %}

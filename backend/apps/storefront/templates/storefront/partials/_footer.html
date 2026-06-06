@@ -1,0 +1,68 @@
+{% load static store i18n %}
+<footer class="footer">
+  <div class="container">
+    <div class="footer__newsletter reveal">
+      <div>
+        <h3>{{ t.footer.newsletter }}</h3>
+        <p style="opacity:.9;margin-top:6px">{{ t.home.promoText }}</p>
+      </div>
+      <form class="newsletter-form" onsubmit="event.preventDefault(); window.zmToast && window.zmToast('{{ t.footer.subscribe|escapejs }} ✓','success'); this.reset();">
+        <input class="input" type="email" placeholder="{{ t.footer.emailPlaceholder }}" required>
+        <button class="btn btn--light" type="submit">{% icon "send" %} {{ t.footer.subscribe }}</button>
+      </form>
+    </div>
+
+    <div class="footer__grid">
+      <div class="footer__col">
+        <a href="{% url 'storefront:home' %}" class="logo">
+          <span class="logo__mark">Z</span>
+          <span class="logo__text" style="display:inline">ZAMON<span>MARKET</span></span>
+        </a>
+        <p class="footer__brand-text">{{ t.footer.about }}</p>
+        <div class="socials">
+          <a href="#" aria-label="Telegram">{% icon "send" %}</a>
+          <a href="#" aria-label="Instagram">{% icon "instagram" %}</a>
+          <a href="#" aria-label="Facebook">{% icon "facebook" %}</a>
+        </div>
+      </div>
+
+      <div class="footer__col">
+        <h4>{{ t.footer.company }}</h4>
+        <a href="#">{{ t.footer.aboutUs }}</a>
+        <a href="#">{{ t.footer.careers }}</a>
+        <a href="#">{{ t.footer.press }}</a>
+        <a href="{% url 'storefront:catalog' %}">{{ t.nav.catalog }}</a>
+      </div>
+
+      <div class="footer__col">
+        <h4>{{ t.footer.help }}</h4>
+        <a href="#">{{ t.footer.delivery }}</a>
+        <a href="#">{{ t.footer.returns }}</a>
+        <a href="#">{{ t.footer.faq }}</a>
+        <a href="#">{{ t.footer.contacts }}</a>
+      </div>
+
+      <div class="footer__col">
+        <h4>{{ t.footer.payments }}</h4>
+        <div class="pay-badges" style="flex-wrap:wrap;gap:6px">
+          <span class="badge">{% icon "credit-card" %} Visa</span>
+          <span class="badge">Click</span>
+          <span class="badge">Payme</span>
+          <span class="badge">UzCard</span>
+        </div>
+        <h4 style="margin-top:18px">{{ t.footer.downloadApp }}</h4>
+        <div class="pay-badges" style="flex-wrap:wrap;gap:6px">
+          <span class="badge">App Store</span>
+          <span class="badge">Google Play</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer__bottom">
+      <span>© {% now "Y" %} {{ t.brand }}. {{ t.footer.rights }}.</span>
+      <div class="pay-badges">
+        {% icon "shield-check" %} <span>Secure payments</span>
+      </div>
+    </div>
+  </div>
+</footer>

@@ -1,0 +1,148 @@
+{% extends "storefront/base.html" %}
+{% load static store i18n %}
+
+{% block title %}{{ page_title|default:t.catalog.title }} — {{ t.brand }}{% endblock %}
+
+{% block content %}
+<div class="container section">
+  <nav class="crumbs">
+    <a href="{% url 'storefront:home' %}">{{ t.common.home }}</a>
+    {% icon "chevron-right" %}
+    {% if is_search %}
+      <span>{{ t.common.search }}: “{{ query }}”</span>
+    {% elif active_category %}
+      <a href="{% url 'storefront:catalog' %}">{{ t.catalog.title }}</a>
+      {% icon "chevron-right" %}<span>{{ active_category|loc }}</span>
+    {% else %}
+      <span>{{ t.catalog.title }}</span>
+    {% endif %}
+  </nav>
+
+  <div class="catalog-bar">
+    <h1>{{ page_title|default:t.catalog.title }}</h1>
+    <div style="display:flex;gap:10px;align-items:center">
+      <select class="select" form="filterForm" name="ordering" onchange="document.getElementById('filterForm').submit()" style="height:42px;width:auto">
+        <option value="-created_at" {% if current_ordering == "-created_at" %}selected{% endif %}>{{ t.catalog.sortNew }}</option>
+        <option value="price" {% if current_ordering == "price" %}selected{% endif %}>{{ t.catalog.sortPriceAsc }}</option>
+        <option value="-price" {% if current_ordering == "-price" %}selected{% endif %}>{{ t.catalog.sortPriceDesc }}</option>
+        <option value="-rating" {% if current_ordering == "-rating" %}selected{% endif %}>{{ t.catalog.sortRating }}</option>
+        <option value="-sold_count" {% if current_ordering == "-sold_count" %}selected{% endif %}>{{ t.catalog.sortPopular }}</option>
+      </select>
+      <button class="btn btn--outline btn--sm filter-toggle" type="button" onclick="document.querySelector('.filters').classList.toggle('mobile-open')">
+        {% icon "sliders" %} {{ t.catalog.filters }}
+      </button>
+    </div>
+  </div>
+
+  <p class="muted" style="margin-bottom:16px">{{ t.catalog.found|fmt:total_count }}</p>
+
+  <div class="catalog-layout">
+    <aside class="filters">
+      <form id="filterForm" method="get" action="{{ request.path }}">
+        {% if is_search %}<input type="hidden" name="q" value="{{ query }}">{% endif %}
+        {% if request.GET.category and not category_slug %}<input type="hidden" name="category" value="{{ request.GET.category }}">{% endif %}
+
+        {% if not category_slug %}
+        <div class="filters__group">
+          <h4 class="filters__title">{{ t.catalog.category }}</h4>
+          <div class="filters__scroll">
+            <a href="?{% qs request category=None page=None %}" class="filter-link {% if not request.GET.category %}is-active{% endif %}">{{ t.catalog.allCategories }}</a>
+            {% for root in filter_categories %}
+              {% if root.children.all %}
+                {% for child in root.children.all %}
+                  <a href="?{% qs request category=child.slug page=None %}" class="filter-link {% if request.GET.category == child.slug %}is-active{% endif %}">{{ child|loc }}</a>
+                {% endfor %}
+              {% else %}
+                <a href="?{% qs request category=root.slug page=None %}" class="filter-link {% if request.GET.category == root.slug %}is-active{% endif %}">{{ root|loc }}</a>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+        <div class="filters__group">
+          <h4 class="filters__title">{{ t.catalog.price }}</h4>
+          <div class="price-row">
+            <input class="input" type="number" name="min_price" min="0" placeholder="{{ t.catalog.from }}" value="{{ request.GET.min_price }}">
+            <span class="muted">—</span>
+            <input class="input" type="number" name="max_price" min="0" placeholder="{{ t.catalog.to }}" value="{{ request.GET.max_price }}">
+          </div>
+        </div>
+
+        {% if brands %}
+        <div class="filters__group">
+          <h4 class="filters__title">{{ t.catalog.brand }}</h4>
+          <select class="select" name="brand">
+            <option value="">{{ t.catalog.allBrands }}</option>
+            {% for b in brands %}
+              <option value="{{ b.slug }}" {% if request.GET.brand == b.slug %}selected{% endif %}>{{ b|loc }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        {% endif %}
+
+        <div class="filters__group">
+          <h4 class="filters__title">{{ t.catalog.rating }}</h4>
+          {% for r in "543" %}
+          <label class="check">
+            <input type="radio" name="rating" value="{{ r }}" {% if request.GET.rating == r %}checked{% endif %}>
+            <span>{{ r }}★ {{ t.catalog.andUp }}</span>
+          </label>
+          {% endfor %}
+        </div>
+
+        <div class="filters__group">
+          <label class="check">
+            <input type="checkbox" name="in_stock" value="true" {% if request.GET.in_stock %}checked{% endif %}>
+            <span style="font-weight:600">{{ t.catalog.inStockOnly }}</span>
+          </label>
+        </div>
+
+        <button class="btn btn--block" type="submit" style="margin-top:6px">{{ t.catalog.apply }}</button>
+        <a href="{{ request.path }}{% if is_search %}?q={{ query|urlencode }}{% endif %}" class="btn btn--ghost btn--block" style="margin-top:8px">{% icon "x" %} {{ t.catalog.reset }}</a>
+      </form>
+    </aside>
+
+    <div class="catalog-main">
+      {% if products %}
+        <div class="product-grid">
+          {% for product in products %}{% include "storefront/partials/_product_card.html" %}{% endfor %}
+        </div>
+
+        {% if page_obj.paginator.num_pages > 1 %}
+        <div class="pagination">
+          {% if page_obj.has_previous %}
+            <a class="page-link" href="?{% qs request page=page_obj.previous_page_number %}">{% icon "chevron-left" %}</a>
+          {% else %}
+            <span class="page-link is-disabled">{% icon "chevron-left" %}</span>
+          {% endif %}
+          {% for num in page_obj.paginator.page_range %}
+            {% if num >= page_obj.number|add:'-2' and num <= page_obj.number|add:'2' %}
+              <a class="page-link {% if num == page_obj.number %}is-active{% endif %}" href="?{% qs request page=num %}">{{ num }}</a>
+            {% endif %}
+          {% endfor %}
+          {% if page_obj.has_next %}
+            <a class="page-link" href="?{% qs request page=page_obj.next_page_number %}">{% icon "chevron-right" %}</a>
+          {% else %}
+            <span class="page-link is-disabled">{% icon "chevron-right" %}</span>
+          {% endif %}
+        </div>
+        {% endif %}
+      {% else %}
+        <div class="empty">
+          <div class="empty__icon">{% icon "search" size=34 %}</div>
+          <h2>{{ t.catalog.empty }}</h2>
+          <a href="{% url 'storefront:catalog' %}" class="btn btn--soft">{{ t.catalog.reset }}</a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<style>
+  @media (max-width:1023px){
+    .filters.mobile-open{ display:block; position:fixed; inset:0; z-index:120; width:100%; border-radius:0; overflow-y:auto; animation:slideUpSheet .34s var(--ease); }
+  }
+  @keyframes slideUpSheet { from { transform:translateY(100%); opacity:.6; } to { transform:translateY(0); opacity:1; } }
+</style>
+{% endblock %}

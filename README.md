@@ -241,25 +241,37 @@ Manrope shrift va 8px grid asosida.
 
 
 
-*** 1-amal 1-terminalda
+## 🟢 BITTA SERVIS — Django butun saytni beradi (yangi)
 
+> Endi **alohida frontend kerak emas**. Django `storefront` ilovasi butun saytni
+> server-rendered HTML + vanilla JS + CSS bilan beradi (premium UI/UX, UZ/RU/EN,
+> dark mode). REST API `/api/v1/` da o'zgarishsiz qoladi.
+
+**Bitta terminal, bitta buyruq:**
+
+```powershell
 cd C:\Users\Lenovo\OneDrive\Desktop\cloneweb\backend
 ..\.venv\Scripts\python.exe manage.py runserver 8000
+```
 
-*** 2-amal 2-terminalda 
+So'ng brauzerda oching:
 
-cd C:\Users\Lenovo\OneDrive\Desktop\cloneweb\frontend
-npm run dev
+| Sahifa            | URL                                      |
+|-------------------|------------------------------------------|
+| 🛍️ Sayt (web)     | http://localhost:8000/                   |
+| 🔧 Admin          | http://localhost:8000/admin/             |
+| 📡 API            | http://localhost:8000/api/v1/            |
+| 📄 Swagger        | http://localhost:8000/api/docs/          |
 
+Til UZ/RU/EN sarlavhadagi 🌐 tugmasi orqali almashadi. Mavzu (yorug'/qorong'i) ☀️/🌙.
 
+### Production deploy (bitta servis)
 
+`render.yaml` allaqachon **bitta web servis** (Django + Postgres) sifatida tayyor:
+`gunicorn config.wsgi:application` → web + API + admin hammasini beradi, static
+fayllar WhiteNoise orqali (cache-busting manifest). Build: `collectstatic` + `migrate`.
 
-
-
-
-
-# Frontend terminalida Ctrl+C bosing, keyin:
-cd C:\Users\Lenovo\OneDrive\Desktop\cloneweb\frontend
-Remove-Item -Recurse -Force .next
-npm run dev
-***
+> Prod'da: `DEBUG=False`, kuchli `SECRET_KEY`, `ALLOWED_HOSTS` ga o'z domeningiz.
+> O'z domeningizdan formalar (login/checkout) ishlashi uchun `CSRF_TRUSTED_ORIGINS`
+> ga `https://sizning-domeningiz` ni qo'shing (Render'da `RENDER_EXTERNAL_HOSTNAME`
+> avtomatik qo'shiladi). Eski Next.js `frontend/` papkasi endi ixtiyoriy.

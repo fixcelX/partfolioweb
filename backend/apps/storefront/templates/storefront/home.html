@@ -1,0 +1,98 @@
+{% extends "storefront/base.html" %}
+{% load static store i18n %}
+
+{% block title %}{{ t.brand }} — {{ t.home.heroTitle }}{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <div class="container">
+    <div class="hero__banner">
+      <span class="hero__orb hero__orb--1"></span>
+      <span class="hero__orb hero__orb--2"></span>
+      <span class="hero__orb hero__orb--3"></span>
+      <div class="hero__content">
+        <span class="hero__tag">{% icon "tag" %} {{ t.home.promoText }}</span>
+        <h1 class="hero__title">{{ t.home.heroTitle }}</h1>
+        <p class="hero__subtitle">{{ t.home.heroSubtitle }}</p>
+        <a href="{% url 'storefront:catalog' %}" class="btn btn--light btn--lg hero__cta">
+          {{ t.home.heroCta }} {% icon "arrow-right" %}
+        </a>
+      </div>
+    </div>
+
+    <div class="features">
+      <div class="feature reveal">
+        <span class="feature__icon">{% icon "truck" %}</span>
+        <div><p class="feature__title">{{ t.home.featDeliveryT }}</p><p class="feature__text">{{ t.home.featDeliveryD }}</p></div>
+      </div>
+      <div class="feature reveal">
+        <span class="feature__icon">{% icon "shield-check" %}</span>
+        <div><p class="feature__title">{{ t.home.featWarrantyT }}</p><p class="feature__text">{{ t.home.featWarrantyD }}</p></div>
+      </div>
+      <div class="feature reveal">
+        <span class="feature__icon">{% icon "percent" %}</span>
+        <div><p class="feature__title">{{ t.home.featPriceT }}</p><p class="feature__text">{{ t.home.featPriceD }}</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <h2 class="section-head__title">{% icon "grid" %} {{ t.home.categories }}</h2>
+      <a href="{% url 'storefront:catalog' %}" class="section-head__link">{{ t.home.viewAll }} {% icon "arrow-right" %}</a>
+    </div>
+    <div class="cat-strip">
+      {% for cat in categories %}
+        <a href="{% url 'storefront:category' cat.slug %}" class="cat-card reveal">
+          <span class="cat-card__icon">{% icon cat.icon|default:"grid" %}</span>
+          <span class="cat-card__name">{{ cat|loc }}</span>
+        </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{% if featured %}
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <h2 class="section-head__title">{% icon "badge-check" %} {{ t.home.featured }}</h2>
+      <a href="{% url 'storefront:catalog' %}?ordering=-rating" class="section-head__link">{{ t.home.viewAll }} {% icon "arrow-right" %}</a>
+    </div>
+    <div class="product-grid">
+      {% for product in featured %}{% include "storefront/partials/_product_card.html" %}{% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% if bestsellers %}
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <h2 class="section-head__title">{% icon "flame" %} {{ t.home.bestsellers }}</h2>
+      <a href="{% url 'storefront:catalog' %}?ordering=-sold_count" class="section-head__link">{{ t.home.viewAll }} {% icon "arrow-right" %}</a>
+    </div>
+    <div class="product-grid">
+      {% for product in bestsellers %}{% include "storefront/partials/_product_card.html" %}{% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% if new_products %}
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <h2 class="section-head__title">{% icon "sparkles" %} {{ t.home.new }}</h2>
+      <a href="{% url 'storefront:catalog' %}?ordering=-created_at" class="section-head__link">{{ t.home.viewAll }} {% icon "arrow-right" %}</a>
+    </div>
+    <div class="product-grid">
+      {% for product in new_products %}{% include "storefront/partials/_product_card.html" %}{% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+{% endblock %}

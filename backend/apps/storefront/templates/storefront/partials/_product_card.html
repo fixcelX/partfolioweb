@@ -1,0 +1,45 @@
+{% load static store i18n %}
+{% with img=product.images.all|first %}
+<article class="card reveal">
+  <button class="wish js-wish {% if product.id in wishlist_ids %}is-active{% endif %}"
+          data-product="{{ product.id }}" type="button"{% if remove_on_unwish %} data-remove-on-unwish="1"{% endif %}
+          aria-label="{{ t.product.addToWishlist }}">{% icon "heart" %}</button>
+
+  <a href="{% url 'storefront:product' product.slug %}" style="display:flex;flex-direction:column;flex:1">
+    <div class="card__media">
+      {% if img and img.src %}
+        <img src="{{ img.src }}" alt="{{ product|loc }}" loading="lazy">
+      {% else %}
+        <div class="card__media-empty">{% icon "package" size=40 %}</div>
+      {% endif %}
+      {% if product.discount_percent > 0 %}
+        <span class="card__discount">-{{ product.discount_percent }}%</span>
+      {% endif %}
+      {% if product.stock > 0 and product.stock <= 3 %}
+        <span class="card__stock">{{ t.product.onlyLeft|fmt:product.stock }}</span>
+      {% endif %}
+    </div>
+
+    <div class="card__body">
+      <div class="card__price-row">
+        <span class="card__price">{{ product.final_price|som }} <span style="font-size:.7em;font-weight:700">{{ t.common.som }}</span></span>
+        {% if product.discount_price %}
+          <span class="card__price-old">{{ product.price|som }}</span>
+        {% endif %}
+      </div>
+      <p class="card__name">{{ product|loc }}</p>
+      <div class="card__meta">
+        {% stars product.rating %}
+        <span>{{ product.rating|floatformat:1 }}</span>
+        <span>·</span>
+        <span>{{ product.reviews_count }}</span>
+      </div>
+    </div>
+  </a>
+
+  <button class="btn btn--soft btn--sm card__cart js-add-cart" data-product="{{ product.id }}"
+          type="button" {% if not product.in_stock %}disabled{% endif %}>
+    {% icon "cart" %} {% if product.in_stock %}{{ t.product.addToCart }}{% else %}{{ t.product.outOfStock }}{% endif %}
+  </button>
+</article>
+{% endwith %}

@@ -1,0 +1,102 @@
+{% load static store i18n %}
+<header class="header js-header">
+  <div class="container header__bar">
+    <a href="{% url 'storefront:home' %}" class="logo" aria-label="{{ t.brand }}">
+      <span class="logo__mark">Z</span>
+      <span class="logo__text">ZAMON<span>MARKET</span></span>
+    </a>
+
+    <button class="catalog-btn js-mega-toggle" type="button">
+      {% icon "grid" %} {{ t.nav.catalog }}
+    </button>
+
+    <form class="search" action="{% url 'storefront:search' %}" method="get" autocomplete="off" role="search">
+      <span class="search__icon">{% icon "search" %}</span>
+      <input class="search__input js-search-input" type="search" name="q"
+             value="{{ request.GET.q|default:'' }}"
+             placeholder="{{ t.nav.search }}" aria-label="{{ t.nav.search }}">
+      <button class="search__submit" type="submit" aria-label="{{ t.common.search }}">{% icon "arrow-right" %}</button>
+      <div class="suggest js-suggest"></div>
+    </form>
+
+    <nav class="nav-actions">
+      <button class="nav-btn js-theme" type="button" aria-label="theme" aria-pressed="false">
+        <span class="js-theme-sun">{% icon "sun" %}</span>
+      </button>
+
+      <div style="position:relative">
+        <button class="nav-btn js-lang-toggle" type="button" aria-label="language">
+          {% icon "globe" %}
+          <span class="nav-btn__label">{{ current_lang|upper }}</span>
+        </button>
+        <form class="lang-menu js-lang-menu" action="{% url 'set_language' %}" method="post">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{{ request.path }}">
+          {% get_available_languages as LANGS %}
+          {% for code, name in LANGS %}
+            <button type="submit" name="language" value="{{ code }}"
+                    class="lang-opt {% if code == current_lang %}is-active{% endif %}">{{ name }}</button>
+          {% endfor %}
+        </form>
+      </div>
+
+      <a href="{% url 'storefront:account' %}" class="nav-btn">
+        {% icon "user" %}
+        <span class="nav-btn__label">{% if user.is_authenticated %}{{ user.first_name|default:t.nav.account }}{% else %}{{ t.nav.login }}{% endif %}</span>
+      </a>
+
+      <a href="{% url 'storefront:wishlist' %}" class="nav-btn">
+        {% icon "heart" %}
+        <span class="nav-btn__label">{{ t.nav.wishlist }}</span>
+      </a>
+
+      <a href="{% url 'storefront:cart' %}" class="nav-btn js-cart-open">
+        {% icon "cart" %}
+        <span class="nav-btn__label">{{ t.nav.cart }}</span>
+        <span class="nav-btn__count js-cart-count" data-count="{{ cart_count }}">{% if cart_count %}{{ cart_count }}{% endif %}</span>
+      </a>
+    </nav>
+  </div>
+
+  {# Mega menu #}
+  <div class="mega js-mega">
+    <div class="container">
+      <div class="mega__grid">
+        {% for cat in nav_categories %}
+          <div class="mega__cat">
+            <a href="{% url 'storefront:category' cat.slug %}" class="mega__cat-head">
+              {% icon cat.icon|default:"grid" %}
+              <span>{{ cat|loc }}</span>
+            </a>
+            {% for child in cat.children.all %}
+              <a href="{% url 'storefront:category' child.slug %}" class="mega__sub">{{ child|loc }}</a>
+            {% endfor %}
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</header>
+
+<style>
+  .lang-menu { position:absolute; top:calc(100% + 8px); right:0; background:var(--surface); border:1px solid var(--border); border-radius:var(--r); box-shadow:var(--shadow-lg); padding:6px; display:none; flex-direction:column; min-width:140px; z-index:70; }
+  .lang-menu.is-open { display:flex; animation:pop .18s var(--ease); }
+  .lang-opt { text-align:left; padding:9px 12px; border-radius:var(--r-sm); font-weight:600; font-size:.88rem; transition:background .15s; }
+  .lang-opt:hover { background:var(--surface-2); }
+  .lang-opt.is-active { background:var(--primary-soft); color:var(--primary-700); }
+</style>
+<script>
+  // Mavzu ikonkasi (quyosh/oy) holatini darhol moslash
+  (function () {
+    var btn = document.querySelector(".js-theme");
+    if (!btn) return;
+    function sync() {
+      var dark = document.documentElement.getAttribute("data-theme") === "dark";
+      btn.innerHTML = dark
+        ? '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>'
+        : '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>';
+    }
+    sync();
+    btn.addEventListener("click", function () { setTimeout(sync, 0); });
+  })();
+</script>

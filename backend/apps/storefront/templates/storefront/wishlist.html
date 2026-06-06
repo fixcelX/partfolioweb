@@ -1,0 +1,27 @@
+{% extends "storefront/base.html" %}
+{% load static store i18n %}
+
+{% block title %}{{ t.wishlist.title }} — {{ t.brand }}{% endblock %}
+
+{% block content %}
+<div class="container section">
+  <h1 style="font-size:clamp(1.5rem,3vw,2rem);margin-bottom:22px;display:flex;align-items:center;gap:10px">
+    {% icon "heart" %} {{ t.wishlist.title }}
+  </h1>
+
+  {% if products %}
+  <div class="product-grid">
+    {% for product in products %}
+      <div class="js-wish-cell">{% include "storefront/partials/_product_card.html" with remove_on_unwish=1 %}</div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty">
+    <div class="empty__icon">{% icon "heart" size=38 %}</div>
+    <h2>{{ t.wishlist.empty }}</h2>
+    <p>{{ t.wishlist.emptyText }}</p>
+    <a href="{% url 'storefront:catalog' %}" class="btn">{{ t.cart.goShopping }}</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

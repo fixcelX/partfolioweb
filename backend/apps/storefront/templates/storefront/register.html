@@ -1,0 +1,56 @@
+{% extends "storefront/base.html" %}
+{% load static store i18n %}
+
+{% block title %}{{ t.auth.registerTitle }} — {{ t.brand }}{% endblock %}
+
+{% block content %}
+<div class="auth-wrap">
+  <div class="auth-card">
+    <div class="auth-card__logo"><span class="logo__mark" style="width:52px;height:52px;font-size:1.6rem">Z</span></div>
+    <h1>{{ t.auth.registerTitle }}</h1>
+    <p class="auth-card__sub">{{ t.brand }}</p>
+
+    {% if form.errors %}
+      <div class="alert alert--error">
+        {% for field in form %}{% for e in field.errors %}{{ field.label }}: {{ e }}<br>{% endfor %}{% endfor %}
+        {% for e in form.non_field_errors %}{{ e }}<br>{% endfor %}
+      </div>
+    {% endif %}
+
+    <form method="post" action="{% url 'storefront:register' %}">
+      {% csrf_token %}
+      <div class="form-grid">
+        <div class="field">
+          <label class="field__label">{{ t.auth.firstName }}</label>
+          <input class="input" name="first_name" value="{{ form.first_name.value|default:'' }}" autocomplete="given-name">
+        </div>
+        <div class="field">
+          <label class="field__label">{{ t.account.lastName }}</label>
+          <input class="input" name="last_name" value="{{ form.last_name.value|default:'' }}" autocomplete="family-name">
+        </div>
+      </div>
+      <div class="field">
+        <label class="field__label">{{ t.auth.email }}</label>
+        <input class="input" type="email" name="email" required value="{{ form.email.value|default:'' }}" autocomplete="email">
+      </div>
+      <div class="field">
+        <label class="field__label">{{ t.auth.phone }}</label>
+        <input class="input" name="phone" value="{{ form.phone.value|default:'' }}" placeholder="+998 90 123 45 67" autocomplete="tel">
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label class="field__label">{{ t.auth.password }}</label>
+          <input class="input" type="password" name="password" required autocomplete="new-password">
+        </div>
+        <div class="field">
+          <label class="field__label">{{ t.auth.passwordConfirm }}</label>
+          <input class="input" type="password" name="password2" required autocomplete="new-password">
+        </div>
+      </div>
+      <button class="btn btn--block btn--lg" type="submit" style="margin-top:6px">{{ t.auth.registerBtn }}</button>
+    </form>
+
+    <p class="auth-card__foot">{{ t.auth.haveAccount }} <a href="{% url 'storefront:login' %}">{{ t.auth.loginLink }}</a></p>
+  </div>
+</div>
+{% endblock %}

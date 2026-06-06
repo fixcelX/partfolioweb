@@ -1,6 +1,7 @@
 # ════════════════════════════════════════════════════════════════════════
-#  ZAMON MARKET — Render Blueprint
-#  Backend (Django) + PostgreSQL bazani avtomatik yaratadi.
+#  ZAMON MARKET — Render Blueprint (BITTA SERVIS)
+#  Django butun saytni (web + API + admin) bitta servisda beradi.
+#  Alohida frontend deploy SHART EMAS.
 #  render.com → "New" → "Blueprint" → bu repozitoriyni tanlang.
 # ════════════════════════════════════════════════════════════════════════
 databases:
@@ -11,7 +12,7 @@ databases:
 
 services:
   - type: web
-    name: zamon-backend
+    name: zamon-market
     runtime: python
     plan: free
     rootDir: backend
@@ -36,8 +37,8 @@ services:
       # Redis'siz ishlash (email/order task'lar darhol bajariladi)
       - key: CELERY_TASK_ALWAYS_EAGER
         value: "True"
-      # ⚠️ Frontend deploy bo'lgach, bu 2 tasini Vercel domeniga almashtiring:
-      - key: CORS_ALLOWED_ORIGINS
-        value: "https://zamon.vercel.app"
+      # Sayt o'zining domeni (RENDER_EXTERNAL_HOSTNAME settings'da avtomatik
+      # ALLOWED_HOSTS va CSRF_TRUSTED_ORIGINS'ga qo'shiladi).
+      # FRONTEND_URL faqat to'lov redirectlari uchun — o'z domeningizga qo'ying:
       - key: FRONTEND_URL
-        value: "https://zamon.vercel.app"
+        value: "https://zamon-market.onrender.com"

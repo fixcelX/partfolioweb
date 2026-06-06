@@ -1,0 +1,150 @@
+{% extends "storefront/base.html" %}
+{% load static store i18n %}
+
+{% block title %}{{ t.account.title }} — {{ t.brand }}{% endblock %}
+
+{% block content %}
+<div class="container section">
+  <div class="account-layout">
+    <aside class="account-side">
+      <div class="account-user">
+        <div class="account-avatar">{{ user.first_name|default:user.email|first|upper }}</div>
+        <b>{{ user.first_name|default:user.email|truncatechars:18 }}</b>
+        <div class="muted" style="font-size:.82rem">{{ user.email }}</div>
+      </div>
+      <nav class="account-nav">
+        <a href="?tab=profile" class="{% if active_tab == 'profile' %}is-active{% endif %}">{% icon "user" %} {{ t.account.tabProfile }}</a>
+        <a href="?tab=orders" class="{% if active_tab == 'orders' %}is-active{% endif %}">{% icon "package" %} {{ t.account.tabOrders }}</a>
+        <a href="?tab=addresses" class="{% if active_tab == 'addresses' %}is-active{% endif %}">{% icon "map-pin" %} {{ t.account.tabAddresses }}</a>
+        <a href="{% url 'storefront:wishlist' %}">{% icon "heart" %} {{ t.account.wishlist }}</a>
+        <a href="{% url 'storefront:logout' %}" class="logout">{% icon "logout" %} {{ t.nav.logout }}</a>
+      </nav>
+    </aside>
+
+    <div>
+      {% include "storefront/partials/_messages.html" %}
+
+      {# Profil #}
+      {% if active_tab == 'profile' %}
+      <div class="panel">
+        <h2>{{ t.account.tabProfile }}</h2>
+        <form method="post" action="{% url 'storefront:account' %}">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="profile">
+          <div class="form-grid">
+            <div class="field">
+              <label class="field__label">{{ t.account.firstName }}</label>
+              <input class="input" name="first_name" value="{{ user.first_name }}">
+            </div>
+            <div class="field">
+              <label class="field__label">{{ t.account.lastName }}</label>
+              <input class="input" name="last_name" value="{{ user.last_name }}">
+            </div>
+            <div class="field">
+              <label class="field__label">{{ t.account.phone }}</label>
+              <input class="input" name="phone" value="{{ user.phone }}" placeholder="+998 90 123 45 67">
+            </div>
+            <div class="field">
+              <label class="field__label">{{ t.account.email }}</label>
+              <input class="input" value="{{ user.email }}" disabled style="opacity:.6">
+            </div>
+          </div>
+          <button class="btn" type="submit" style="margin-top:6px">{% icon "check" %} {{ t.account.save }}</button>
+        </form>
+      </div>
+      {% endif %}
+
+      {# Buyurtmalar #}
+      {% if active_tab == 'orders' %}
+      <div class="panel">
+        <h2>{{ t.account.orders }}</h2>
+        {% if orders %}
+          {% for order in orders %}
+          <div class="order-card">
+            <div class="order-card__head">
+              <div>
+                <b>{{ t.account.orderNumber }} {{ order.number }}</b>
+                <div class="muted" style="font-size:.82rem">{{ order.created_at|date:"d.m.Y H:i" }}</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:12px">
+                <span class="status-tag" data-s="{{ order.status }}">{{ order.get_status_display }}</span>
+                <b>{{ order.total|som }} {{ t.common.som }}</b>
+              </div>
+            </div>
+            {% include "storefront/partials/_order_progress.html" %}
+            <div class="order-card__items">
+              {% for it in order.items.all %}
+              <div class="order-line"><span>{{ it.quantity }}× {{ it.product_name }}</span><span>{{ it.subtotal|som }} {{ t.common.som }}</span></div>
+              {% endfor %}
+            </div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="empty" style="padding:50px 20px">
+            <div class="empty__icon">{% icon "package" size=34 %}</div>
+            <p>{{ t.account.noOrders }}</p>
+            <a href="{% url 'storefront:catalog' %}" class="btn btn--soft">{{ t.cart.goShopping }}</a>
+          </div>
+        {% endif %}
+      </div>
+      {% endif %}
+
+      {# Manzillar #}
+      {% if active_tab == 'addresses' %}
+      <div class="panel" style="margin-bottom:18px">
+        <h2>{{ t.account.tabAddresses }}</h2>
+        {% if addresses %}
+          <div class="form-grid">
+            {% for a in addresses %}
+            <div class="address-card {% if a.is_default %}is-default{% endif %}">
+              {% if a.is_default %}<span class="badge badge--primary" style="position:absolute;top:12px;right:12px">{{ t.account.default }}</span>{% endif %}
+              <b>{{ a.full_name }}</b>
+              <div class="muted" style="font-size:.86rem;margin-top:4px">{{ a.phone }}</div>
+              <div style="font-size:.9rem;margin-top:6px">{{ a.region }}, {{ a.city }}, {{ a.street }}</div>
+              <div style="display:flex;gap:8px;margin-top:12px">
+                {% if not a.is_default %}
+                <form method="post" action="{% url 'storefront:account' %}">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="set_default">
+                  <input type="hidden" name="address_id" value="{{ a.id }}">
+                  <button class="btn btn--soft btn--sm" type="submit">{{ t.account.setDefault }}</button>
+                </form>
+                {% endif %}
+                <form method="post" action="{% url 'storefront:account' %}">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="delete_address">
+                  <input type="hidden" name="address_id" value="{{ a.id }}">
+                  <button class="btn btn--ghost btn--sm" type="submit" style="color:var(--danger)">{% icon "trash" %}</button>
+                </form>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="muted">{{ t.account.noAddresses }}</p>
+        {% endif %}
+      </div>
+
+      <div class="panel">
+        <h2>{{ t.account.newAddress }}</h2>
+        <form method="post" action="{% url 'storefront:account' %}">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="add_address">
+          <div class="form-grid">
+            <div class="field"><label class="field__label">{{ t.account.fullName }}</label><input class="input" name="full_name" required></div>
+            <div class="field"><label class="field__label">{{ t.account.phone }}</label><input class="input" name="phone" required></div>
+            <div class="field"><label class="field__label">{{ t.account.region }}</label><input class="input" name="region" required></div>
+            <div class="field"><label class="field__label">{{ t.account.city }}</label><input class="input" name="city" required></div>
+            <div class="field field--full"><label class="field__label">{{ t.account.street }}</label><input class="input" name="street" required></div>
+            <div class="field field--full">
+              <label class="check"><input type="checkbox" name="is_default" value="true"> <span>{{ t.account.setDefault }}</span></label>
+            </div>
+          </div>
+          <button class="btn" type="submit">{% icon "plus" %} {{ t.account.addAddress }}</button>
+        </form>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

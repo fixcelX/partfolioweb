@@ -69,6 +69,7 @@ LOCAL_APPS = [
     "apps.payments",
     "apps.reviews",
     "apps.wishlist",
+    "apps.storefront",  # Server-rendered premium web frontend (HTML/CSS/JS)
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -91,13 +92,17 @@ ROOT_URLCONF = "config.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
                 "django.template.context_processors.request",
+                "django.template.context_processors.i18n",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                # Storefront global context: tarjimalar (t), savat soni,
+                # kategoriya menyusi, joriy til.
+                "apps.storefront.context_processors.storefront",
             ],
         },
     },
@@ -145,11 +150,30 @@ USE_TZ = True
 # ---------------------------------------------------------------------------
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
+# Dev'da oddiy storage (manifest collectstatic' siz xato bermasin),
+# prod'da WhiteNoise siqilgan + manifestli (cache-busting) storage.
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {
+        "BACKEND": (
+            "django.contrib.staticfiles.storage.StaticFilesStorage"
+            if DEBUG
+            else "whitenoise.storage.CompressedManifestStaticFilesStorage"
+        )
+    },
+}
+
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# ---------------------------------------------------------------------------
+# Storefront (server-rendered web) auth oqimi — Django sessiyasi
+# ---------------------------------------------------------------------------
+LOGIN_URL = "/login/"
+LOGIN_REDIRECT_URL = "/account/"
+LOGOUT_REDIRECT_URL = "/"
 
 # ---------------------------------------------------------------------------
 # Django REST Framework

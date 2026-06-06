@@ -1,0 +1,33 @@
+{% extends "storefront/base.html" %}
+{% load static store i18n %}
+
+{% block title %}{{ t.auth.loginTitle }} — {{ t.brand }}{% endblock %}
+
+{% block content %}
+<div class="auth-wrap">
+  <div class="auth-card">
+    <div class="auth-card__logo"><span class="logo__mark" style="width:52px;height:52px;font-size:1.6rem">Z</span></div>
+    <h1>{{ t.auth.loginTitle }}</h1>
+    <p class="auth-card__sub">{{ t.brand }}</p>
+
+    {% include "storefront/partials/_messages.html" %}
+
+    <form method="post" action="{% url 'storefront:login' %}">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ next }}">
+      <div class="field">
+        <label class="field__label">{{ t.auth.email }}</label>
+        <input class="input" type="email" name="email" required value="{{ form.email.value|default:'' }}" autocomplete="email" placeholder="email@example.com">
+      </div>
+      <div class="field">
+        <label class="field__label">{{ t.auth.password }}</label>
+        <input class="input" type="password" name="password" required autocomplete="current-password" placeholder="••••••••">
+      </div>
+      <button class="btn btn--block btn--lg" type="submit">{% icon "user" %} {{ t.auth.loginBtn }}</button>
+    </form>
+
+    <div class="demo-hint">{{ t.auth.demoHint }}</div>
+    <p class="auth-card__foot">{{ t.auth.noAccount }} <a href="{% url 'storefront:register' %}">{{ t.auth.registerLink }}</a></p>
+  </div>
+</div>
+{% endblock %}

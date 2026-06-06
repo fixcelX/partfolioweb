@@ -1,0 +1,63 @@
+{% extends "storefront/base.html" %}
+{% load static store i18n %}
+
+{% block title %}{{ t.cart.title }} — {{ t.brand }}{% endblock %}
+
+{% block content %}
+<div class="container section">
+  <h1 style="font-size:clamp(1.5rem,3vw,2rem);margin-bottom:22px">{{ t.cart.title }}</h1>
+
+  {% if items %}
+  <div class="cart-layout">
+    <div>
+      {% for item in items %}
+      {% with img=item.product.images.all|first %}
+      <div class="cart-item" data-item="{{ item.id }}" data-qty="{{ item.quantity }}">
+        <a href="{% url 'storefront:product' item.product.slug %}">
+          {% if img and img.src %}
+            <img class="cart-item__img" src="{{ img.src }}" alt="{{ item.product|loc }}" loading="lazy">
+          {% else %}
+            <div class="cart-item__img" style="display:grid;place-items:center">{% icon "package" %}</div>
+          {% endif %}
+        </a>
+        <div class="cart-item__body">
+          <a href="{% url 'storefront:product' item.product.slug %}" class="cart-item__name">{{ item.product|loc }}</a>
+          <span class="cart-item__price">{{ item.product.final_price|som }} {{ t.common.som }}</span>
+          <div class="cart-item__foot">
+            <div class="qty">
+              <button class="js-page-dec" type="button" aria-label="-">{% icon "minus" %}</button>
+              <span class="js-item-qty">{{ item.quantity }}</span>
+              <button class="js-page-inc" type="button" aria-label="+">{% icon "plus" %}</button>
+            </div>
+            <button class="cart-item__remove js-page-remove" type="button">{% icon "trash" %} {{ t.cart.remove }}</button>
+            <span class="cart-item__sub js-item-sub">{{ item.subtotal|som }} {{ t.common.som }}</span>
+          </div>
+        </div>
+      </div>
+      {% endwith %}
+      {% endfor %}
+
+      <a href="{% url 'storefront:catalog' %}" class="btn btn--ghost" style="margin-top:8px">{% icon "chevron-left" %} {{ t.cart.continue }}</a>
+    </div>
+
+    <aside class="summary">
+      <h3>{{ t.cart.title }}</h3>
+      <div class="summary__row"><span>{{ t.cart.subtotal }}</span><span class="js-cart-total">{{ cart_total|som }} {{ t.common.som }}</span></div>
+      <div class="summary__row"><span>{{ t.cart.delivery }}</span><span style="color:var(--success);font-weight:700">{{ t.cart.free }}</span></div>
+      <div class="summary__total">
+        <span>{{ t.cart.total }}</span>
+        <b class="js-cart-total">{{ cart_total|som }} {{ t.common.som }}</b>
+      </div>
+      <a href="{% url 'storefront:checkout' %}" class="btn btn--block btn--lg" style="margin-top:16px">{{ t.cart.checkout }} {% icon "arrow-right" %}</a>
+    </aside>
+  </div>
+  {% else %}
+  <div class="empty">
+    <div class="empty__icon">{% icon "cart" size=38 %}</div>
+    <h2>{{ t.cart.empty }}</h2>
+    <p>{{ t.cart.emptyText }}</p>
+    <a href="{% url 'storefront:catalog' %}" class="btn">{{ t.cart.goShopping }}</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

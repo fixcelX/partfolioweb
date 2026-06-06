@@ -1,0 +1,14 @@
+{% load store i18n %}
+{% order_steps order.status as steps %}
+{% if steps %}
+<div class="order-progress">
+  {% for s in steps %}
+  <div class="order-step {% if s.done %}is-done{% endif %} {% if s.active %}is-active{% endif %}">
+    <span class="order-step__dot">{% if s.done %}{% icon "check" %}{% else %}{{ s.num }}{% endif %}</span>
+    <span class="order-step__label">{{ s.label }}</span>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="order-cancelled">{% icon "x" %} {{ t.status.cancelled }}</div>
+{% endif %}

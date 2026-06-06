@@ -1,0 +1,36 @@
+{% extends "storefront/base.html" %}
+{% load static store i18n %}
+
+{% block title %}{{ t.success.title }} — {{ t.brand }}{% endblock %}
+
+{% block content %}
+<div class="container section">
+  <div style="max-width:560px;margin:30px auto;text-align:center">
+    <div class="empty__icon" style="margin:0 auto 22px;width:96px;height:96px;background:var(--success-soft);color:var(--success)">{% icon "check" size=44 %}</div>
+    <h1 style="font-size:1.8rem">{{ t.success.title }}</h1>
+    <p class="muted" style="margin-top:10px">{{ t.success.text|fmt:order.number }}</p>
+
+    <div class="panel" style="margin-top:24px;text-align:left">
+      <div class="order-card__head" style="border:none;padding:0">
+        <div>
+          <b style="font-size:1.1rem">{{ t.account.orderNumber }} {{ order.number }}</b>
+          <div class="muted" style="font-size:.85rem">{{ order.created_at|date:"d.m.Y H:i" }}</div>
+        </div>
+        <span class="status-tag" data-s="{{ order.status }}">{{ order.get_status_display }}</span>
+      </div>
+      {% include "storefront/partials/_order_progress.html" %}
+      <div class="order-card__items" style="margin-top:14px;border-top:1px solid var(--border);padding-top:14px">
+        {% for it in order.items.all %}
+        <div class="order-line"><span>{{ it.quantity }}× {{ it.product_name }}</span><span>{{ it.subtotal|som }} {{ t.common.som }}</span></div>
+        {% endfor %}
+      </div>
+      <div class="summary__total" style="margin-top:14px"><span>{{ t.cart.total }}</span><b>{{ order.total|som }} {{ t.common.som }}</b></div>
+    </div>
+
+    <div style="display:flex;gap:10px;justify-content:center;margin-top:24px;flex-wrap:wrap">
+      <a href="{% url 'storefront:account' %}?tab=orders" class="btn">{{ t.success.toOrders }}</a>
+      <a href="{% url 'storefront:home' %}" class="btn btn--outline">{{ t.success.toHome }}</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
