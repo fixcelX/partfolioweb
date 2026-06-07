@@ -18,7 +18,7 @@ uritemplate==4.2.0
 
 # --- Production / Docker extras (installed in container) ---
 gunicorn==23.0.0
-psycopg[binary]==3.2.3
+psycopg[binary]>=3.2.10   # >=3.2.10: Python 3.13/3.14 uchun wheel mavjud (3.2.3 da yo'q edi)
 whitenoise==6.8.2
 celery==5.4.0
 redis==5.2.1

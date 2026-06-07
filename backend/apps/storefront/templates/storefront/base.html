@@ -35,18 +35,6 @@
 
   {% include "storefront/partials/_footer.html" %}
 
-  {# Savat drawer #}
-  <div class="overlay js-overlay"></div>
-  <aside class="drawer js-drawer" aria-label="{{ t.cart.title }}">
-    <div class="drawer__head">
-      <h3>{{ t.cart.title }}</h3>
-      <button class="drawer__close js-drawer-close" aria-label="{{ t.common.cancel }}">{% icon "x" %}</button>
-    </div>
-    <div class="drawer__body js-drawer-body">
-      <p class="muted" style="text-align:center;padding:40px 0">{{ t.common.loading }}</p>
-    </div>
-  </aside>
-
   <button class="to-top js-to-top" aria-label="{{ t.common.backHome }}">{% icon "arrow-up" %}</button>
 
   <script>

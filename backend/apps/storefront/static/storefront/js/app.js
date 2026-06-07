@@ -9,6 +9,24 @@
   const I18N = window.ZM_I18N || {};
   const URLS = window.ZM_URLS || {};
 
+  /* ---- Rasm zaxira (tashqi rasm yuklanmasa — chiroyli placeholder) -- */
+  // Tashqi (Unsplash) rasmlar ba'zan yuklanmaydi; "buzilgan rasm" belgisi
+  // o'rniga brendlangan neytral pleysholder ko'rsatamiz. error hodisasi
+  // ko'tarilmagani uchun capture fazasida tinglaymiz.
+  const IMG_FALLBACK =
+    "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' fill='%23f6efe6'/%3E%3Cg fill='none' stroke='%23c9b89c' stroke-width='6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M70 122l85-85a8 8 0 0 1 11 0l9 9a8 8 0 0 1 0 11l-85 85a8 8 0 0 1-11 0l-9-9a8 8 0 0 1 0-11z' transform='translate(-18 -10)'/%3E%3Cpath d='M64 84h72v52a8 8 0 0 1-8 8H72a8 8 0 0 1-8-8z'/%3E%3Cpath d='M64 100l18 14 16-12 38 28'/%3E%3Ccircle cx='86' cy='100' r='6'/%3E%3C/g%3E%3C/svg%3E";
+  document.addEventListener(
+    "error",
+    function (e) {
+      const t = e.target;
+      if (t && t.tagName === "IMG" && t.src !== IMG_FALLBACK && !t.dataset.fb) {
+        t.dataset.fb = "1";
+        t.src = IMG_FALLBACK;
+      }
+    },
+    true
+  );
+
   /* ---- CSRF -------------------------------------------------------- */
   function getCookie(name) {
     const m = document.cookie.match("(^|;)\\s*" + name + "\\s*=\\s*([^;]+)");
@@ -51,6 +69,17 @@
     }, 2400);
   }
   window.zmToast = toast;
+
+  /* ---- Server xabarlari (Django messages) -> o'ng tomondagi toast --- */
+  // Muvaffaqiyat ("Saqlandi" kabi) xabarlari o'ngdan chiqadigan toast bo'ladi.
+  // Xato xabarlar sahifada inline qoladi (foydalanuvchi o'qib ulgursin).
+  (function initServerMessages() {
+    $$(".messages .alert--success").forEach((el) => {
+      toast(el.textContent.trim(), "success");
+      el.remove();
+    });
+    $$(".messages").forEach((m) => { if (!m.children.length) m.remove(); });
+  })();
 
   /* ---- Theme ------------------------------------------------------- */
   function applyTheme(t) {
@@ -97,8 +126,7 @@
       quantity: qty || 1,
     });
     if (r.status === 200 && r.data.ok) {
-      renderDrawer(r.data);
-      openDrawer();
+      setBadge(r.data.count);
       toast((I18N.added) || "Added to cart", "success");
     } else if (r.status === 404) {
       toast((I18N.error) || "Error", "error");
@@ -161,7 +189,7 @@
       return;
     }
 
-    if (t.closest(".js-cart-open")) { e.preventDefault(); openDrawer(); refreshDrawer(); return; }
+    // Savat tugmasi alohida sahifaga o'tadi (drawer ishlatilmaydi).
     if (t.closest(".js-drawer-close") || t.closest(".js-overlay")) { closeDrawer(); return; }
 
     const megaBtn = t.closest(".js-mega-toggle");
